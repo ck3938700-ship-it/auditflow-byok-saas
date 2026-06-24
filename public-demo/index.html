@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AuditFlow BYOK SaaS Demo</title>
+    <meta
+      name="description"
+      content="BYOK AI SaaS boilerplate with multi-tenant workflows, RAG citations, approvals, and audit hash-chain logging."
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fa;
+        --panel: #ffffff;
+        --text: #24292f;
+        --muted: #57606a;
+        --border: #d0d7de;
+        --blue: #0969da;
+        --green: #1a7f37;
+        --red: #cf222e;
+        --yellow: #9a6700;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      a {
+        color: var(--blue);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 260px minmax(0, 1fr);
+        min-height: 100vh;
+      }
+
+      aside {
+        border-right: 1px solid var(--border);
+        background: var(--panel);
+        padding: 24px;
+      }
+
+      aside strong {
+        display: block;
+        margin-bottom: 20px;
+        font-size: 18px;
+      }
+
+      nav button {
+        display: block;
+        width: 100%;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        padding: 9px 10px;
+        text-align: left;
+        font: inherit;
+      }
+
+      nav button.active {
+        background: #eaeef2;
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      main {
+        padding: 40px;
+      }
+
+      .hero,
+      .panel,
+      .table-panel {
+        max-width: 1080px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 28px;
+      }
+
+      .hero {
+        margin-bottom: 16px;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: var(--blue);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      h1 {
+        max-width: 820px;
+        margin: 0;
+        font-size: 34px;
+        line-height: 1.15;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+      }
+
+      .lead {
+        max-width: 820px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+      }
+
+      .badge {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: #f6f8fa;
+        padding: 6px 10px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        max-width: 1080px;
+      }
+
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .card strong,
+      .card span {
+        display: block;
+      }
+
+      .card span {
+        margin-top: 8px;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      button.primary,
+      a.primary {
+        display: inline-block;
+        border: 1px solid var(--blue);
+        border-radius: 6px;
+        background: var(--blue);
+        color: #ffffff;
+        cursor: pointer;
+        padding: 9px 12px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 10px 12px;
+        font: inherit;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: #f6f8fa;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .status {
+        margin-top: 14px;
+        color: var(--muted);
+      }
+
+      .quote {
+        border-left: 3px solid var(--blue);
+        background: #f6f8fa;
+        padding: 12px 14px;
+        color: var(--muted);
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @media (max-width: 840px) {
+        .layout,
+        .grid,
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        main {
+          padding: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside>
+        <strong>AuditFlow</strong>
+        <nav>
+          <button class="active" data-view="dashboard">Dashboard</button>
+          <button data-view="knowledge">Knowledge Base</button>
+          <button data-view="ask">Ask AI</button>
+          <button data-view="drafts">Drafts</button>
+          <button data-view="approvals">Approvals</button>
+          <button data-view="audit">Audit Logs</button>
+          <button data-view="settings">Settings</button>
+        </nav>
+      </aside>
+
+      <main>
+        <section class="view" id="dashboard">
+          <div class="hero">
+            <p class="eyebrow">BYOK AI SaaS Boilerplate</p>
+            <h1>Audit every AI decision. Own every API call. Trust nothing blindly.</h1>
+            <p class="lead">
+              A production-oriented starter for multi-tenant AI workflows,
+              source-cited answers, approval gates, and audit hash-chain logging.
+            </p>
+            <div class="badges">
+              <span class="badge">BYOK</span>
+              <span class="badge">Multi-tenant</span>
+              <span class="badge">RAG citations</span>
+              <span class="badge">Approval workflow</span>
+              <span class="badge">Audit hash chain</span>
+            </div>
+            <div class="toolbar">
+              <a class="primary" href="https://github.com/ck3938700-ship-it/auditflow-byok-saas">View GitHub Repo</a>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card">
+              <strong>Client-side BYOK</strong>
+              <span>Provider keys stay in the user's browser or customer-owned proxy.</span>
+            </article>
+            <article class="card">
+              <strong>RAG with citations</strong>
+              <span>Retrieved context is mapped to source documents and chunk indexes.</span>
+            </article>
+            <article class="card">
+              <strong>Audit-first workflow</strong>
+              <span>AI output, retrieved context, risk, and approvals are traceable.</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="view hidden" id="knowledge">
+          <div class="panel">
+            <p class="eyebrow">Knowledge Base</p>
+            <h2>Paste, chunk, retrieve</h2>
+            <div class="form-grid">
+              <label>Document title <input value="HR probation policy" /></label>
+              <label>Tenant <input value="acme-demo" /></label>
+            </div>
+            <label style="margin-top: 14px">
+              Document text
+              <textarea rows="8">Employees on probation may be terminated only after HR review, documented performance evidence, and manager approval. Legal review is required for high-risk cases.</textarea>
+            </label>
+            <div class="toolbar">
+              <button class="primary" id="chunkBtn">Save And Chunk</button>
+            </div>
+            <p class="status" id="knowledgeStatus">Ready to create searchable chunks.</p>
+          </div>
+        </section>
+
+        <section class="view hidden" id="ask">
+          <div class="panel">
+            <p class="eyebrow">Ask AI</p>
+            <h2>Client-side BYOK answer with citations</h2>
+            <label>
+              Question
+              <textarea rows="5">Can I terminate an employee during probation?</textarea>
+            </label>
+            <div class="toolbar">
+              <button class="primary" id="askBtn">Run Demo Flow</button>
+            </div>
+            <div class="quote" id="answerBox" style="margin-top: 16px">
+              Click "Run Demo Flow" to retrieve context, generate an answer, and record an audit event.
+            </div>
+          </div>
+        </section>
+
+        <section class="view hidden" id="drafts">
+          <div class="table-panel">
+            <p class="eyebrow" style="padding: 0 12px">Drafts</p>
+            <table>
+              <thead>
+                <tr><th>Workflow</th><th>Status</th><th>Risk</th><th>Approval</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Probation termination memo</td><td>WAITING_APPROVAL</td><td>HIGH 70</td><td>Required</td></tr>
+                <tr><td>Policy FAQ draft</td><td>RUNNING</td><td>LOW 10</td><td>Not required</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="view hidden" id="approvals">
+          <div class="table-panel">
+            <p class="eyebrow" style="padding: 0 12px">Approvals</p>
+            <table>
+              <thead>
+                <tr><th>Workflow</th><th>Reason</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Probation termination memo</td><td>Critical HR term matched: terminate employee</td><td>PENDING</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="view hidden" id="audit">
+          <div class="panel">
+            <p class="eyebrow">Audit Logs</p>
+            <h2>Append-only hash chain</h2>
+            <div class="quote">
+              #12 AI_OUTPUT_RECORDED<br />
+              previous_hash: 7c4218...<br />
+              entry_hash: b91f0a...<br />
+              payload: userInput, retrievedContext, model, provider, aiOutput
+            </div>
+          </div>
+        </section>
+
+        <section class="view hidden" id="settings">
+          <div class="panel">
+            <p class="eyebrow">Settings</p>
+            <h2>Local BYOK provider key</h2>
+            <div class="form-grid">
+              <label>Provider <select><option>OpenAI</option><option>DeepSeek</option><option>Claude</option></select></label>
+              <label>Model <input value="gpt-4o-mini" /></label>
+            </div>
+            <label style="margin-top: 14px">API Key <input type="password" value="stored locally only" /></label>
+            <p class="status">In the real app, this is encrypted with Web Crypto and never sent to the hosted backend.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const buttons = document.querySelectorAll("nav button");
+      const views = document.querySelectorAll(".view");
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          buttons.forEach((item) => item.classList.remove("active"));
+          views.forEach((view) => view.classList.add("hidden"));
+          button.classList.add("active");
+          document.getElementById(button.dataset.view).classList.remove("hidden");
+        });
+      });
+
+      document.getElementById("chunkBtn").addEventListener("click", () => {
+        document.getElementById("knowledgeStatus").textContent =
+          "Document ready: 3 chunks created with citation mapping.";
+      });
+
+      document.getElementById("askBtn").addEventListener("click", () => {
+        document.getElementById("answerBox").innerHTML =
+          "Answer: Termination during probation may be possible only after HR review, documented evidence, and manager approval. High-risk cases require legal review. <strong>[1]</strong><br><br>Citation [1]: HR probation policy #0<br>Audit event created: AI_OUTPUT_RECORDED";
+      });
+    </script>
+  </body>
+</html>

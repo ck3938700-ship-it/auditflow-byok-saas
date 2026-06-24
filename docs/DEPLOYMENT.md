@@ -2,6 +2,12 @@
 
 This project is designed for self-hosting and open-source reuse.
 
+Public showcase demo:
+
+```text
+https://auditflow-byok-saas.pages.dev
+```
+
 ## Requirements
 
 - Node.js 20.11 or newer.
@@ -60,4 +66,3 @@ Recommended first production path:
 - Managed Postgres.
 - R2/S3 for uploaded files.
 - pgvector or Supabase vector for retrieval.
-

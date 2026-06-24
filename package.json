@@ -2,7 +2,7 @@
   "name": "auditflow-byok-saas",
   "version": "0.1.0",
   "private": true,
-  "description": "Production-ready BYOK AI SaaS boilerplate with multi-tenant workflow, audit logs, and optional secure proxy mode.",
+  "description": "BYOK AI SaaS boilerplate with multi-tenant workflows, RAG citations, approvals, and audit hash-chain logging.",
   "license": "MIT",
   "scripts": {
     "dev": "next dev apps/web",

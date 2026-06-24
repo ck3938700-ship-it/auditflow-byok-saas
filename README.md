@@ -7,6 +7,8 @@
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 ![CI](https://github.com/ck3938700-ship-it/auditflow-byok-saas/actions/workflows/ci.yml/badge.svg)
 
+**Live Demo:** [https://auditflow-byok-saas.pages.dev](https://auditflow-byok-saas.pages.dev)
+
 Audit every AI decision. Own every API call. Trust nothing blindly.
 
 AI answers you can trust, trace, and audit, powered by your own API key.
@@ -229,6 +231,7 @@ packages
   db
   rag
   workflow
+public-demo
 docs
 scripts
 .github/workflows
@@ -315,6 +318,12 @@ Still recommended before production:
 
 See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
+The public showcase demo is deployed on Cloudflare Pages:
+
+```text
+https://auditflow-byok-saas.pages.dev
+```
+
 Recommended first deployment target: a Node-compatible platform with managed Postgres.
 
 Cloudflare Pages can be supported with the right Next.js adapter and database/runtime choices, but the current Prisma + route-handler setup is simplest on a Node-compatible host first.
@@ -332,4 +341,3 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## License
 
 MIT. See [LICENSE](LICENSE).
-
