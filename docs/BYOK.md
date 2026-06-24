@@ -17,6 +17,11 @@ Flow:
 
 The backend does not receive the API key.
 
+Browser-direct provider calls are the simplest BYOK mode, but some providers or
+enterprise networks may block direct browser requests through CORS, rate limits,
+or outbound policy controls. In those deployments, use the optional secure proxy
+mode below.
+
 ## Optional Secure Proxy Mode
 
 Enterprise users can deploy their own proxy in their own infrastructure.
@@ -43,4 +48,3 @@ Audit events may include:
 - Timestamp.
 
 Audit events must not include provider API keys.
-

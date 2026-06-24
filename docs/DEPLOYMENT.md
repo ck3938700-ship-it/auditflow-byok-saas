@@ -8,6 +8,10 @@ Public showcase demo:
 https://auditflow-byok-saas.pages.dev
 ```
 
+This Cloudflare Pages deployment is a public showcase. The full SaaS app needs a
+Node-compatible runtime for Next.js route handlers and a PostgreSQL database for
+persisted workflows, documents, approvals, and audit logs.
+
 ## Requirements
 
 - Node.js 20.11 or newer.

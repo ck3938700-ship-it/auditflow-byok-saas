@@ -7,7 +7,11 @@
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 ![CI](https://github.com/ck3938700-ship-it/auditflow-byok-saas/actions/workflows/ci.yml/badge.svg)
 
-**Live Demo:** [https://auditflow-byok-saas.pages.dev](https://auditflow-byok-saas.pages.dev)
+**Public Showcase Demo:** [https://auditflow-byok-saas.pages.dev](https://auditflow-byok-saas.pages.dev)
+
+The Cloudflare Pages demo is a public product showcase. To run the full SaaS app
+with API routes and persisted workflow data, deploy the Next.js app with a
+Node-compatible runtime and PostgreSQL.
 
 Audit every AI decision. Own every API call. Trust nothing blindly.
 
@@ -73,6 +77,8 @@ This is the intended product loop:
 - Claude adapter.
 - Browser-only encrypted localStorage vault.
 - No hosted backend LLM endpoint.
+- Optional customer-hosted secure proxy mode for enterprise deployments where
+  browser-direct provider calls are not acceptable.
 
 ### Audit-First Workflow
 
@@ -245,6 +251,7 @@ cd auditflow-byok-saas
 npm install
 cp .env.example .env
 npm run db:generate
+npm run db:migrate
 npm run verify
 npm run dev
 ```
@@ -257,6 +264,7 @@ cd auditflow-byok-saas
 npm.cmd install
 Copy-Item .env.example .env
 npm.cmd run db:generate
+npm.cmd run db:migrate
 npm.cmd run verify
 npm.cmd run dev
 ```
