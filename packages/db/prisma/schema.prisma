@@ -1,0 +1,267 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TenantPlan {
+  FREE
+  TEAM
+  ENTERPRISE
+}
+
+enum MemberStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+}
+
+enum WorkflowStatus {
+  DRAFT
+  RUNNING
+  WAITING_APPROVAL
+  APPROVED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum WorkflowType {
+  ASK_AI
+  DRAFT_GENERATION
+  HR_REVIEW
+  LEGAL_REVIEW
+  FINANCE_REVIEW
+  COMPLIANCE_REVIEW
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  READY
+  FAILED
+  ARCHIVED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum AuditEventType {
+  TENANT_CREATED
+  USER_JOINED
+  WORKFLOW_CREATED
+  WORKFLOW_RISK_SCORED
+  APPROVAL_REQUESTED
+  APPROVAL_DECISIONED
+  DOCUMENT_UPLOADED
+  DOCUMENT_CHUNKED
+  RETRIEVAL_PERFORMED
+  AI_OUTPUT_RECORDED
+  SETTINGS_UPDATED
+}
+
+model Tenant {
+  id          String             @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String             @unique
+  plan        TenantPlan         @default(FREE)
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+  memberships TenantMembership[]
+  roles       Role[]
+  workflows   Workflow[]
+  documents   Document[]
+  chunks      DocumentChunk[]
+  embeddings  Embedding[]
+  auditLogs   AuditLog[]
+  approvals   Approval[]
+
+  @@map("tenants")
+}
+
+model User {
+  id            String             @id @default(uuid()) @db.Uuid
+  email         String             @unique
+  name          String?
+  imageUrl      String?            @map("image_url")
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+  memberships   TenantMembership[]
+  auditLogs     AuditLog[]
+  requested     Approval[]         @relation("ApprovalRequester")
+  reviewed      Approval[]         @relation("ApprovalReviewer")
+
+  @@map("users")
+}
+
+model Role {
+  id          String             @id @default(uuid()) @db.Uuid
+  tenantId    String             @map("tenant_id") @db.Uuid
+  name        String
+  permissions Json
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+  tenant      Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  members     TenantMembership[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("roles")
+}
+
+model TenantMembership {
+  id        String       @id @default(uuid()) @db.Uuid
+  tenantId  String       @map("tenant_id") @db.Uuid
+  userId    String       @map("user_id") @db.Uuid
+  roleId    String       @map("role_id") @db.Uuid
+  status    MemberStatus @default(INVITED)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+  tenant    Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role         @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, userId])
+  @@index([tenantId])
+  @@index([userId])
+  @@map("tenant_memberships")
+}
+
+model Workflow {
+  id              String         @id @default(uuid()) @db.Uuid
+  tenantId        String         @map("tenant_id") @db.Uuid
+  createdByUserId String?        @map("created_by_user_id") @db.Uuid
+  type            WorkflowType
+  status          WorkflowStatus @default(DRAFT)
+  title           String
+  input           Json
+  retrievedContext Json?         @map("retrieved_context")
+  draftOutput     Json?          @map("draft_output")
+  finalOutput     Json?          @map("final_output")
+  riskScore       Int            @default(0) @map("risk_score")
+  riskLevel       RiskLevel      @default(LOW) @map("risk_level")
+  approvalRequired Boolean       @default(false) @map("approval_required")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  approvals       Approval[]
+  auditLogs       AuditLog[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, type])
+  @@map("workflows")
+}
+
+model Document {
+  id              String         @id @default(uuid()) @db.Uuid
+  tenantId        String         @map("tenant_id") @db.Uuid
+  uploadedByUserId String?       @map("uploaded_by_user_id") @db.Uuid
+  title           String
+  sourceType      String         @map("source_type")
+  storageKey      String         @map("storage_key")
+  mimeType        String         @map("mime_type")
+  sizeBytes       BigInt         @map("size_bytes")
+  checksumSha256  String         @map("checksum_sha256")
+  status          DocumentStatus @default(UPLOADED)
+  metadata        Json?
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  chunks          DocumentChunk[]
+
+  @@index([tenantId, status])
+  @@map("documents")
+}
+
+model DocumentChunk {
+  id         String      @id @default(uuid()) @db.Uuid
+  tenantId   String      @map("tenant_id") @db.Uuid
+  documentId String      @map("document_id") @db.Uuid
+  chunkIndex Int         @map("chunk_index")
+  content    String
+  tokenCount Int?        @map("token_count")
+  pageStart  Int?        @map("page_start")
+  pageEnd    Int?        @map("page_end")
+  metadata   Json?
+  createdAt  DateTime    @default(now()) @map("created_at")
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  document   Document    @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  embedding  Embedding?
+
+  @@unique([documentId, chunkIndex])
+  @@index([tenantId, documentId])
+  @@map("document_chunks")
+}
+
+model Embedding {
+  id        String        @id @default(uuid()) @db.Uuid
+  tenantId  String        @map("tenant_id") @db.Uuid
+  chunkId   String        @unique @map("chunk_id") @db.Uuid
+  provider  String
+  model     String
+  vector    Unsupported("vector(1536)")
+  createdAt DateTime      @default(now()) @map("created_at")
+  tenant    Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  chunk     DocumentChunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("embeddings")
+}
+
+model AuditLog {
+  id              String         @id @default(uuid()) @db.Uuid
+  tenantId        String         @map("tenant_id") @db.Uuid
+  userId          String?        @map("user_id") @db.Uuid
+  workflowId      String?        @map("workflow_id") @db.Uuid
+  eventType       AuditEventType @map("event_type")
+  sequence        BigInt
+  payload         Json
+  previousHash    String?        @map("previous_hash")
+  entryHash       String         @map("entry_hash")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user            User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  workflow        Workflow?      @relation(fields: [workflowId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, sequence])
+  @@unique([tenantId, entryHash])
+  @@index([tenantId, eventType])
+  @@index([tenantId, workflowId])
+  @@map("audit_logs")
+}
+
+model Approval {
+  id                String         @id @default(uuid()) @db.Uuid
+  tenantId          String         @map("tenant_id") @db.Uuid
+  workflowId        String         @map("workflow_id") @db.Uuid
+  requestedByUserId String?        @map("requested_by_user_id") @db.Uuid
+  reviewerUserId    String?        @map("reviewer_user_id") @db.Uuid
+  status            ApprovalStatus @default(PENDING)
+  reason            String?
+  decisionNote      String?        @map("decision_note")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  decidedAt         DateTime?      @map("decided_at")
+  tenant            Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workflow          Workflow       @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  requestedBy       User?          @relation("ApprovalRequester", fields: [requestedByUserId], references: [id], onDelete: SetNull)
+  reviewer          User?          @relation("ApprovalReviewer", fields: [reviewerUserId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, status])
+  @@index([tenantId, workflowId])
+  @@map("approvals")
+}
+

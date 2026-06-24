@@ -1,0 +1,38 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "paths": {
+      "@/*": [
+        "apps/web/*"
+      ],
+      "@auditflow/audit": [
+        "packages/audit/src"
+      ],
+      "@auditflow/db": [
+        "packages/db/src"
+      ],
+      "@auditflow/rag": [
+        "packages/rag/src"
+      ],
+      "@auditflow/workflow": [
+        "packages/workflow/src"
+      ]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "../../packages/**/*.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "auditflow-byok-saas",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Production-ready BYOK AI SaaS boilerplate with multi-tenant workflow, audit logs, and optional secure proxy mode.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev apps/web",
+    "build": "next build apps/web",
+    "typecheck": "tsc --noEmit",
+    "prisma:validate": "prisma validate --schema packages/db/prisma/schema.prisma",
+    "db:generate": "prisma generate --schema packages/db/prisma/schema.prisma",
+    "db:migrate": "prisma migrate dev --schema packages/db/prisma/schema.prisma",
+    "phase1:smoke": "node scripts/phase1-smoke-test.mjs",
+    "verify": "npm run prisma:validate && npm run typecheck && npm run phase1:smoke && npm run build"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.10.1",
+    "next": "^15.3.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.33",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "prisma": "^6.10.1",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=20.11"
+  }
+}
